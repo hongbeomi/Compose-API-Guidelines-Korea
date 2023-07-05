@@ -365,37 +365,58 @@ fun ActionRail(state: ActionRailState) {
 
 <br/>
 
-Compose UI API structure
-Compose UI is a UI toolkit built on the Compose runtime. This section outlines guidelines for APIs that use and extend the Compose UI toolkit.
+## Compose UI API 구조
+Compose UI는 Compose 런타임 위에 구축된 UI 툴킷입니다. 이 섹션에서는 Compose UI 툴킷을 사용하고 확장하는 API에 대한 지침을 설명합니다.
 
-Compose UI elements
-A @Composable function that emits exactly one Compose UI tree node is called an element.
+<br/>
 
-Example:
+### Compose UI 요소(Elements)
+하나의 Compose UI 트리 노드를 정확히 발생시키는 `@Composable` 함수를 "요소(element)"라고 합니다.
 
+<br/>
+
+### 예시:
+```kotlin
 @Composable
 fun SimpleLabel(
     text: String,
     modifier: Modifier = Modifier
 ) {
-Jetpack Compose framework development and Library development MUST follow all guidelines in this section.
+```
 
-Jetpack Compose app development SHOULD follow all guidelines in this section.
+<br/>
+**Jetpack Compose 프레임워크 개발과 라이브러리 개발**은 이 섹션의 모든 지침을 따라야 합니다.
 
-Elements return Unit
-Elements MUST emit their root UI node either directly by calling emit() or by calling another Compose UI element function. They MUST NOT return a value. All behavior of the element not available from the state of the composition MUST be provided by parameters passed to the element function.
+<br/>
 
-Why?
-Elements are declarative entities in a Compose UI composition. Their presence or absence in the composition determines whether they appear in the resulting UI. Returning a value is not necessary; any means of controlling the emitted element should be provided as a parameter to the element function, not returned by calling the element function. See the, “hoisted state” section in the Compose API design patterns section of this document for more information.
+**Jetpack Compose 앱 개발**은 이 섹션의 모든 지침을 가능한 만큼 따르는 것이 좋습니다.
 
-Do
+<br/>
+
+### 요소(Elements)는 Unit을 리턴합니다.
+요소는 반드시 루트 UI 노드를 직접 `emit()`을 호출하거나 다른 Compose UI 요소 함수를 호출하여 발생(emit)시켜야 합니다. 요소는 값을 리턴해서는 안 되며, composition의 상태가 아닌 요소의 모든 동작은 요소 함수에 전달된 매개변수를 통해 제공되어야 합니다.
+
+<br/>
+
+### Why?
+요소는 Compose UI 구성(composition)에서 선언적 엔티티입니다. 그들의 존재 또는 부재가 결과적으로 UI에 나타나는지를 결정합니다. 값을 리턴하는 것은 필요하지 않으며, 발생시킨 요소를 제어하는 어떤 방법이든 요소 함수에 전달된 매개변수로 제공되어야 합니다. 자세한 정보는 이 문서의 **Compose API 디자인 패턴** 섹션의 **hoisted state** 부분을 참조하세요.
+
+<br/>
+
+### ✅ Do
+```kotlin
 @Composable
 fun FancyButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-Don't
+```
+
+<br/>
+
+### ❌ Don't
+```kotlin
 interface ButtonState {
     val clicks: Flow<ClickEvent>
     val measuredSize: Size
@@ -406,27 +427,36 @@ fun FancyButton(
     text: String,
     modifier: Modifier = Modifier
 ): ButtonState {
-Elements accept and respect a Modifier parameter
-Element functions MUST accept a parameter of type Modifier. This parameter MUST be named “modifier” and MUST appear as the first optional parameter in the element function's parameter list. Element functions MUST NOT accept multiple Modifier parameters.
+```
 
-If the element function‘s content has a natural minimum size - that is, if it would ever measure with a non-zero size given constraints of minWidth and minHeight of zero - the default value of the modifier parameter MUST be Modifier - the Modifier type’s companion object that represents the empty Modifier. Element functions without a measurable content size (e.g. Canvas, which draws arbitrary user content in the size available) MAY require the modifier parameter and omit the default value.
+<br/>
 
-Element functions MUST provide their modifier parameter to the Compose UI node they emit by passing it to the root element function they call. If the element function directly emits a Compose UI layout node, the modifier MUST be provided to the node.
+### 요소는 Modifier 매개변수를 받아들이고 존중합니다.
+요소 함수는 반드시 `Modifier` 타입의 매개변수를 받아들여야 합니다. 이 매개변수는 **modifier라는** 이름으로 명명되어야 하며, 요소 함수의 매개변수 목록에서 첫 번째 옵셔널 매개변수로 나타나야 합니다. 요소 함수는 여러 개의 `Modifier` 매개변수를 받아들여서는 안 됩니다.
 
-Element functions MAY concatenate additional modifiers to the end of the received modifier parameter before passing the concatenated modifier chain to the Compose UI node they emit.
+만약 요소 함수의 내용이 자연스러운 최소의 크기를 가지고 있는 경우 - 즉, `minWidth`와 `minHeight`가 0인 제약 조건으로도 비정규적인 크기로 측정될 수 있는 경우 - `modifier` 매개변수의 기본 값은 `Modifier`로 지정되어야 합니다. 이는 `Modifier` 타입의 동반 객체로서 빈 `Modifier`를 나타냅니다. 측정 가능한 내용 크기가 없는 요소 함수(예: 사용 가능한 크기에서 임의의 사용자 콘텐츠를 그리는 `Canvas`)는 `modifier` 매개변수를 요구하고 기본 값을 생략할 수 있습니다.
 
-Element functions MUST NOT concatenate additional modifiers to the beginning of the received modifier parameter before passing the concatenated modifier chain to the Compose UI node they emit.
+요소 함수는 자신이 생성한 Compose UI 노드에 제공되는 `modifier` 매개변수를 전달해야 합니다. 요소 함수가 직접 Compose UI `Layout` 노드를 발생시키는 경우, `modifier는` 해당 노드에 제공되어야 합니다.
 
-Why?
-Modifiers are the standard means of adding external behavior to an element in Compose UI and allow common behavior to be factored out of individual or base element API surfaces. This allows element APIs to be smaller and more focused, as modifiers are used to decorate those elements with standard behavior.
+요소 함수는 자신이 생성한 Compose UI 노드에 전달하기 전에 추가적인 `modifier`를 수행할 수 있습니다. 이러한 경우 추가적인 `modifier`를 수행하기 전에 수신한 `modifier` 매개변수의 끝에 이어붙여야 합니다.
 
-An element function that does not accept a modifier in this standard way does not permit this decoration and motivates consuming code to wrap a call to the element function in an additional Compose UI layout such that the desired modifier can be applied to the wrapper layout instead. This does not prevent the developer behavior of modifying the element, and forces them to write more inefficient UI code with a deeper tree structure to achieve their desired result.
+요소 함수는 자신이 생성한 Compose UI 노드에 전달하기 전에 수신한 `modifier` 매개변수의 시작 부분에 추가적인 `modifier`를 연결해서는 안 됩니다.
 
-Modifiers occupy the first optional parameter slot to set a consistent expectation for developers that they can always provide a modifier as the final positional parameter to an element call for any given element's common case.
+<br/>
 
-See the Compose UI modifiers section below for more details.
+### Why?
+`Modifier`는 Compose UI에서 요소에 외부 동작을 추가하는 표준 수단이며, 공통 동작을 개별 또는 기본 요소 API surface에서 분리할 수 있습니다. 이는 요소 API를 더 작고 집중적으로 유지할 수 있도록 해주며, `modifier`를 사용하여 해당 요소에 표준 동작을 추가합니다.
 
-Do
+이 표준 방식으로 `modifier를` 받아들이지 않는 요소 함수는 이러한 데코레이션을 허용하지 않으며, 원하는 `modifier`를 적용하기 위해 소비 코드가 호출을 래핑하게 됩니다. 이렇게 되면 요소를 수정하는 개발자의 행위가 방해되며, 원하는 결과를 얻기 위해 더 깊은 트리 구조의 비효율적인 UI 코드를 작성하도록 강제됩니다.
+
+`modifier`는 요소의 공통 케이스(common case)에 대해 항상 최종 위치 매개변수로 `modifier`를 제공할 수 있는 개발자의 일관된 기대를 설정합니다.
+
+자세한 내용은 아래의 **Compose UI modifiers** 섹션을 참조하세요.
+
+<br/>
+
+### ✅ Do
+```kotlin
 @Composable
 fun FancyButton(
     text: String,
@@ -438,6 +468,10 @@ fun FancyButton(
         .clickable(onClick)
         .padding(horizontal = 32.dp, vertical = 16.dp)
 )
+```
+
+<br/>
+
 Compose UI layouts
 A Compose UI element that accepts one or more @Composable function parameters is called a layout.
 
