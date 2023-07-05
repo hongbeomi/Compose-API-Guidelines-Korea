@@ -548,13 +548,15 @@ WeightedRow {
 
 <br/>
 
-Compose API design patterns
-This section outlines patterns for addressing common use cases when designing a Jetpack Compose API.
+## Compose API 디자인 패턴
+이 섹션에서는 Jetpack Compose API를 설계할 때 일반적인 사용 사례를 해결하기 위한 패턴을 개략적으로 설명합니다.
 
-Prefer stateless and controlled @Composable functions
-In this context, “stateless” refers to @Composable functions that retain no state of their own, but instead accept external state parameters that are owned and provided by the caller. “Controlled” refers to the idea that the caller has full control over the state provided to the composable.
+기본적으로 상태가 없는(stateless) `@Composable` 함수를 선호합니다. 여기서 "stateless"는 자체 상태를 유지하지 않고 호출자가 소유하고 제공하는 외부 상태 매개변수를 사용하는 `@Composable` 함수를 의미합니다. "제어 가능한(Controlled)"은 호출자가 `@Composable`에 제공되는 상태를 완전히 제어할 수 있다는 개념을 나타냅니다.
 
-Do
+<br/>
+
+### ✅ Do
+```kotlin
 @Composable
 fun Checkbox(
     isChecked: Boolean,
@@ -562,12 +564,17 @@ fun Checkbox(
 ) {
 // ...
 
-// Usage: (caller mutates optIn and owns the source of truth)
+// 사용: (호출자가 optIn을 수정하고 진실된 소스(**source of truth**)를 소유함)
 Checkbox(
     myState.optIn,
     onToggle = { myState.optIn = !myState.optIn }
 )
-Don't
+```
+
+<br/>
+
+### ✅ Don't
+```kotlin
 @Composable
 fun Checkbox(
     initialValue: Boolean,
@@ -576,22 +583,32 @@ fun Checkbox(
     var checkedState by remember { mutableStateOf(initialValue) }
 // ...
 
-// Usage: (Checkbox owns the checked state, caller notified of changes)
-// Caller cannot easily implement a validation policy.
+// 사용: (Checkbox가 체크된 상태를 소유하며 호출자가 변경 사항을 통지받음)
+// 호출자는 쉽게 유효성 검사 정책을 구현할 수 없음
 Checkbox(false, onToggled = { callerCheckedState = it })
-Separate state and events
-Compose's mutableStateOf() value holders are observable through the Snapshot system and can notify observers of changes. This is the primary mechanism for requesting recomposition, relayout, or redraw of a Compose UI. Working effectively with observable state requires acknowledging the distinction between state and events.
+```
 
-An observable event happens at a point in time and is discarded. All registered observers at the time the event occurred are notified. All individual events in a stream are assumed to be relevant and may build on one another; repeated equal events have meaning and therefore a registered observer must observe all events without skipping.
+<br/>
 
-Observable state raises change events when the state changes from one value to a new, unequal value. State change events are conflated; only the most recent state matters. Observers of state changes must therefore be idempotent; given the same state value the observer should produce the same result. It is valid for a state observer to both skip intermediate states as well as run multiple times for the same state and the result should be the same.
+### state와 event 분리
+Compose의 `mutableStateOf()`로 값을 보관하는 방법은 Snapshot 시스템을 통해 관찰 가능하며, 변경 사항이 발생할 때 옵저버에게 알릴 수 있습니다. 관찰 가능한 상태와 이벤트를 효과적으로 처리하려면 상태와 이벤트 간의 차이를 인지하는 것이 중요합니다.
 
-Compose operates on state as input, not events. Composable functions are state observers where both the function parameters and any mutableStateOf() value holders that are read during execution are inputs.
+관찰 가능한 이벤트는 특정 시점에 발생하며 폐기됩니다. 이벤트가 발생한 시점에 등록된 모든 옵저버에게 알립니다. stream의 각 이벤트는 관련이 있으며 서로 연속적으로 발생할 수 있습니다. 따라서 중복되는 이벤트는 의미가 있으며, 등록된 옵저버는 이벤트를 건너뛰지 않고 모든 이벤트를 관찰해야 합니다.
 
-Hoisted state types
-A pattern of stateless parameters and multiple event callback parameters will eventually reach a point of scale where it becomes unwieldy. As a composable function's parameter list grows it may become appropriate to factor a collection of state and callbacks into an interface, allowing a caller to provide a cohesive policy object as a unit.
+관찰 가능한 상태는 상태가 한 값에서 새로운 값으로 변경될 때 변경 이벤트를 발생시킵니다. 상태 변경 이벤트는 중복될 수 없으며, 최신 상태만 중요하게 여깁니다. 상태 변경 이벤트의 옵저버는 멱등성(idempotent)입니다. 즉, 동일한 상태 값을 주어지면 옵저버는 동일한 결과를 생성해야 합니다. 상태 옵저버는 중간 상태를 건너뛸 수도 있으며, 동일한 상태에 대해 여러 번 실행될 수도 있으며 결과는 동일해야 합니다.
 
-Before
+Compose는 입력으로 상태를 사용하는 방식으로 작동합니다. Composable 함수는 상태 옵저버이며, 함수 매개변수와 실행 중에 읽은 모든 
+ `mutableStateOf()` 값을 입력으로 사용합니다.
+
+<br/>
+
+### 호이스팅된 상태(Hoisted state) 타입
+상태가 많아지면 상태가 없는 매개변수와 여러 이벤트 콜백 매개변수로 구성된 함수의 매개변수 목록이 불편한 정도로 커질 수 있습니다. 이러한 경우 상태와 콜백을 하나의 인터페이스로 묶어서 호출자가 일관된 정책을 객체 단위로 제공할 수 있도록 할 수 있습니다.
+
+<br/>
+
+### Before
+```kotlin
 @Composable
 fun VerticalScroller(
     scrollPosition: Int,
@@ -599,7 +616,12 @@ fun VerticalScroller(
     onScrollPositionChange: (Int) -> Unit,
     onScrollRangeChange: (Int) -> Unit
 ) {
-After
+```
+
+<br/>
+
+### After
+```kotlin
 @Stable
 interface VerticalScrollerState {
     var scrollPosition: Int
@@ -610,18 +632,23 @@ interface VerticalScrollerState {
 fun VerticalScroller(
     verticalScrollerState: VerticalScrollerState
 ) {
-In the example above, an implementation of VerticalScrollerState is able to use custom get/set behaviors of the related var properties to apply policy or delegate storage of the state itself elsewhere.
+```
+위의 예시에서 `VerticalScrollerState`의 구현은 관련된 `var` 속성의 `get/set` 동작을 사용하여 정책을 적용하거나 상태 자체의 저장소를 다른 곳에서 처리할 수 있습니다.
 
-Jetpack Compose framework and Library development SHOULD declare hoisted state types for collecting and grouping interrelated policy. The VerticalScrollerState example above illustrates such a dependency between the scrollPosition and scrollRange properties; to maintain internal consistency such a state object should clamp scrollPosition into the valid range during set attempts. (Or otherwise report an error.) These properties should be grouped as handling their consistency involves handling all of them together.
+**Jetpack Compose 프레임워크와 라이브러리 개발**은 관련된 정책을 수집하고 그룹화하기 위해 hoisted 상태 타입을 선언해야 합니다. 위의 `VerticalScrollerState` 예제는 `scrollPosition`과 `scrollRange` 속성 간의 의존성을 보여줍니다. 따라서 이러한 상태 객체는 모두 함께 처리되어야 합니다.
 
-Jetpack Compose framework and Library development SHOULD declare hoisted state types as @Stable and correctly implement the @Stable contract.
+**Jetpack Compose 프레임워크와 라이브러리 개발**은 `@Stable`로 선언된 hoisted 상태 타입을 사용하고 `@Stable` 계약을 올바르게 구현해야 합니다.
 
-Jetpack Compose framework and Library development SHOULD name hoisted state types that are specific to a given composable function as the composable function's name suffixed by, “State”.
+**Jetpack Compose 프레임워크와 라이브러리 개발**은 해당 composable 함수에 특정한 hoisted 상태 타입의 이름에 "**State**" 접미사를 붙여야 합니다.
 
-Default policies through hoisted state objects
-Custom implementations or even external ownership of these policy objects are often not required. By using Kotlin‘s default arguments, Compose’s remember {} API, and the Kotlin “extension constructor” pattern, an API can provide a default state handling policy for simple usage while permitting more sophisticated usage when desired.
+기본 정책은 hoisted 상태 객체를 통해 제공하는 것입니다.
 
-Example:
+커스텀 구현 또는 외부 소유에서 이러한 정책이 객체에 필요하지 않을 수도 있습니다. Kotlin의 기본 인자, Compose의 `remember {}` API 및 Kotlin "extension constructor(익스텐션 생성자)" 패턴을 사용하여 API는 간단한 사용에 대해 기본 상태 처리 정책을 제공하면서 필요한 경우 더 정교한 사용을 허용할 수 있습니다.
+
+<br/>
+
+예시:
+```kotlin
 fun VerticalScrollerState(): VerticalScrollerState = 
     VerticalScrollerStateImpl()
 
@@ -655,35 +682,49 @@ fun VerticalScroller(
     verticalScrollerState: VerticalScrollerState =
         remember { VerticalScrollerState() }
 ) {
-Jetpack Compose framework and Library development SHOULD declare hoisted state types as interfaces instead of abstract or open classes if they are not declared as final classes.
+```
 
-When designing an open or abstract class to be properly extensible for these use cases it is easy to create hidden requirements of state synchronization for internal consistency that are difficult (or impossible) for an extending developer to preserve. Using an interface that can be freely implemented strongly discourages private contracts between composable functions and hoisted state objects by way of Kotlin internal-scoped properties or functionality.
+**Jetpack Compose 프레임워크와 라이브러리 개발**은 hoisted 상태 타입을 `final` 클래스로 선언하지 않은 경우 `abstract` 또는 `open` 클래스 대신 `interface`로 선언해야 합니다.
 
-Jetpack Compose framework and Library development SHOULD provide default state implementations remembered as default arguments. State objects MAY be required parameters if the composable cannot function if the state object is not configured by the caller.
+이러한 용도로 `open` 또는 `abstract` 클래스를 설계할 때 내부 일관성을 위해 상태 동기화에 대한 숨겨진 요구 사항을 만들기 쉽습니다. 이 요구 사항은 확장하는 개발자가 유지하기 어려울(혹은 불가능하거나) 수도 있습니다. 인터페이스를 사용하면 자유롭게 구현할 수 있으며, Kotlin의 `internal`-스코프 프로퍼티나 함수를 통해 composable 함수와 hoisted 상태 객체 간의 `private` 계약을 강력하게 제한합니다.
 
-Jetpack Compose framework and Library development MUST NOT use null as a sentinel indicating that the composable function should internally remember {} its own state. This can create accidental inconsistent or unexpected behavior if null has a meaningful interpretation for the caller and is provided to the composable function by mistake.
 
-Do
+**Jetpack Compose 프레임워크와 라이브러리 개발**은 기본 인자로 default state로 구현된 remember한 값을 제공해야 합니다. `State` 객체는 composable 함수가 호출자에 의해 구성되지 않아서 동작하지 않을 경우 필요한 기본 매개변수일 수 있습니다.
+
+**Jetpack Compose 프레임워크와 라이브러리 개발**은 `null`을 composable 함수가 내부적으로 자체 상태를 `remember {}`해야 함을 나타내는 표식으로 사용해서는 안 됩니다. 이는 호출자에게 `null`이 의미 있는 해석이 될 수 있고 실수로 composable 함수에 제공된 경우 우연히 일관성이 없거나 예상치 못한 동작을 생성할 수 있습니다.
+
+<br/>
+
+### ✅ Do
+```kotlin
 @Composable
 fun VerticalScroller(
     verticalScrollerState: VerticalScrollerState =
         remember { VerticalScrollerState() }
 ) {
-Don't
-// Null as a default can cause unexpected behavior if the input parameter
-// changes between null and non-null.
+```
+
+<br/>
+
+### ❌ Don't
+```kotlin
+// 입력 매개변수가 null과 non-null 값 사이에서 변경되는 경우 null을 기본값으로 사용하는 것은 예상치 못한 동작을 일으킬 수 있습니다.
 @Composable
 fun VerticalScroller(
     verticalScrollerState: VerticalScrollerState? = null
 ) {
     val realState = verticalScrollerState ?:
         remember { VerticalScrollerState() }
-Extensibility of hoisted state types
-Hoisted state types often implement policy and validation that impact behavior for a composable function that accepts it. Concrete and especially final hoisted state types imply containment and ownership of the source of truth that the state object appeals to.
+```
 
-In extreme cases this can defeat the benefits of reactive UI API designs by creating multiple sources of truth, necessitating app code to synchronize data across multiple objects. Consider the following:
+<br/>
 
-// Defined by another team or library
+### hoisted state 타입의 확장성
+호이스팅된 상태 타입은 종종 정책과 유효성 검사를 구현하여 해당 타입을 허용하는 composable 함수의 동작에 영향을 미칩니다. 특히 구체적이고 최종적인 호이스팅된 상태 유형은 상태 객체가 속한 데이터의 소유권과 소스를 나타냅니다.
+
+극단적인 경우, 이로 인해 반응형 UI API 디자인의 장점을 상실할 수 있으며, 여러가지 진실의 소스(source of truth)을 만들어 내며, 앱 코드가 여러 객체 간의 데이터 동기화를 필요로 합니다. 다음을 상황을 고려해 보세요:
+```kotlin
+// 다른 팀이나 라이브러리에서 구현함.
 data class PersonData(val name: String, val avatarUrl: String)
 
 class FooState {
@@ -693,7 +734,7 @@ class FooState {
     fun setPersonAvatarUrl(url: String)
 }
 
-// Defined by the UI layer, by yet another team
+// UI 레이어에 또 다른 팀에서 정의함.
 class BarState {
     var name: String
     var avatarUrl: String
@@ -701,10 +742,11 @@ class BarState {
 
 @Composable
 fun Bar(barState: BarState) {
-These APIs are difficult to use together because both the FooState and BarState classes want to be the source of truth for the data they represent. It is often the case that different teams, libraries, or modules do not have the option of agreeing on a single unified type for data that must be shared across systems. These designs combine to form a requirement for potentially error-prone data syncing on the part of the app developer.
+```
+이러한 API는 함께 사용하기 어렵습니다. 왜냐하면 `FooState와` `BarState` 클래스 모두 해당 데이터의 진실의 소스(source of truth)이 되고자 합니다. 종종 다른 팀, 라이브러리 또는 모듈에서 공유해야 하는 데이터에 대해 단일한 통일화된 타입으로 합의하는 것이 불가능한 경우가 많습니다. 이러한 디자인은 앱 개발자가 잠재적으로 오류가 발생할 수 있는 데이터 동기화를 해야하는 요구사항을 만들어내게 됩니다.
 
-A more flexible approach defines both of these hoisted state types as interfaces, permitting the integrating developer to define one in terms of the other, or both in terms of a third type, preserving single source of truth in their system's state management:
-
+더 유연한 접근 방법은 이러한 호이스팅된 상태 타입을 인터페이스로 정의하는 것입니다. 이를 통해 통합 개발자가 하나를 다른 것으로 정의하거나 둘 다 세 번째 타입으로 정의할 수 있으며, 시스템의 상태 관리에서 단일화된 진실의 소스(source of truth)를 보존할 수 있습니다:
+```kotlin
 @Stable
 interface FooState {
     val currentPersonData: PersonData
@@ -737,10 +779,11 @@ class MyState(
         this.avatarUrl = url
     }
 }
-Jetpack Compose framework and Library development SHOULD declare hoisted state types as interfaces to permit custom implementations. If additional standard policy enforcement is necessary, consider an abstract class.
+```
+**Jetpack Compose 프레임워크 및 라이브러리 개발**은 커스텀 구현을 허용하기 위해 호이스팅된 상태 타입을 인터페이스로 선언해야 합니다. 추가적인 표준 정책 강제화가 필요한 경우 `abstract` 클래스를 고려하십시오.
 
-Jetpack Compose framework and Library development SHOULD offer a factory function for a default implementation of hoisted state types sharing the same name as the type. This preserves the same simple API for consumers as a concrete type. Example:
-
+**Jetpack Compose 프레임워크 및 라이브러리 개발**은 동일한 이름을 가진 호이스팅된 상태 타입의 기본 구현을 위한 팩토리 함수를 제공해야 합니다. 이는 구체적인 타입과 동일한 간단한 API를 소비자에게 제공합니다. 예시:
+```kotlin
 @Stable
 interface FooState {
     // ...
@@ -752,8 +795,10 @@ private class FooStateImpl(...) : FooState {
     // ...
 }
 
-// Usage
+// 사용
 val state = remember { FooState() }
-App development SHOULD prefer simpler concrete types until the abstraction provided by an interface proves necessary. When it does, adding a factory function for a default implementation as outlined above is a source-compatible change that does not require refactoring of usage sites.
+```
 
-Powered by Gitiles| Privacy| Terms
+<br/>
+
+**앱 개발**은 `interface`에 의해 제공되는 추상화가 필요하다는 것이 증명될 때까지 더 단순한 구체적인 타입을 선호해야 합니다. 인터페이스가 필요한 경우 위에 설명한 대로 기본 구현을 위한 팩토리 함수를 추가하는 것은 소스-호환이 가능한 수정이므로 사용하는 부분을 리팩토링할 필요가 없습니다.
