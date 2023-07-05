@@ -164,52 +164,76 @@ fun drawProfileImage(image: ImageAsset) {
 
 <br/>
 
+## 값을 리턴하는 @Composable 함수 명명
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 `Unit`이 아닌 값을 리턴하는 `@Composable`에 어노테이션이 달린 함수의 이름을 지정하기 위해 표준 Kotlin 코딩 규칙을 따라야 합니다.
 
-Naming @Composable functions that return values
-Jetpack Compose framework development and Library development MUST follow the standard Kotlin Coding Conventions for the naming of functions for any function annotated @Composable that returns a value other than Unit.
+<br/>
 
-Jetpack Compose framework development and Library development MUST NOT use the factory function exemption in the Kotlin Coding Conventions for the naming of functions for naming any function annotated @Composable as a PascalCase type name matching the function's abstract return type.
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 함수의 추상적 리턴 타입과 매치되는 `PascalCase`로 명명된 어노테이션이 달린 함수의 이름을 지정하기 위해 Kotlin Coding Conventions의 팩토리 함수 규약을 사용해서는 안 됩니다.
 
-Why
-While useful and accepted outside of @Composable functions, this factory function convention has drawbacks that set inappropriate expectations for callers when used with @Composable functions.
+<br/>
 
-Primary motivations for marking a factory function as @Composable include using composition to establish a managed lifecycle for the object or using CompositionLocals as inputs to the object‘s construction. The former implies the use of Compose’s remember {} API to cache and maintain the object instance across recompositions, which can break caller expectations around a factory operation that reads like a constructor call. (See the next section.) The latter motivation implies unseen inputs that should be expressed in the factory function name.
+### Why?
+이 팩토리 함수 규약은 `@Composable` 함수 이외에서 유용하고 허용되지만 `@Composable` 함수와 함께 사용할 때 호출자에게 부적절한 기대치를 설정하는 단점이 있습니다.
 
-Additionally, the mental model of Unit-returning @Composable functions as declarative entities should not be confused with a, “virtual DOM” mental model. Returning values from @Composable functions named as PascalCase nouns promotes this confusion, and may promote an undesirable style of returning a stateful control surface for a present UI entity that would be better expressed and more useful as a hoisted state object.
+팩토리 함수를 `@Composable`로 표시하는 주요 예시로는, composition을 사용하여 객체의 라이프사이클을 설정하거나 `CompositionLocals`를 객체의 구성에 대한 입력으로 사용하는 경우가 있습니다. 전자는 recomposition 전반에 걸쳐 객체 인스턴스를 캐시하고 유지 관리하기 위해 Compose의 `remember {}` API를 사용하는 것을 의미하며, 이는 생성자 호출처럼 읽어들이는 팩토리 작업에 대한 호출자의 예상을 깨뜨릴 수 있습니다.(다음 섹션 참조) 후자의 동기는 팩토리 함수 이름으로 표현되어야 하는 보이지 않는 입력을 의미합니다.
 
-More information about state hoisting patterns can be found in the design patterns section of this document.
+또한 선언적 구체로서 `@Composable` 함수를 리턴하는 단위의 멘탈 모델은 "가상 DOM" 멘탈 모델과 혼동되어서는 안 됩니다. `PascalCase` 명사로 명명된 `@Composable` 함수에서 값을 리턴하는 것은 이러한 혼란을 조장하고, 호이스팅된 상태 객체로 더 잘 표현할 수 있으며 현재 UI 엔티티에 대해 상태 저장을 제어하는 surface를 리턴하는 바람직하지 않은 스타일을 촉진할 수 있습니다.
 
-Do
-// Returns a style based on the current CompositionLocal settings
-// This function qualifies where its value comes from
+상태 호이스팅 패턴에 대한 자세한 내용은 이 문서의 디자인 패턴 섹션을 참조하십시오.
+
+<br/>
+
+### Do
+```kotlin
+// 현재 CompositionLocal 설정을 기준으로 스타일을 반환합니다. 이 함수는 해당 값의 출처를 한정합니다.
 @Composable
 fun defaultStyle(): Style {
-Don't
-// Returns a style based on the current CompositionLocal settings
-// This function looks like it's constructing a context-free object!
+```
+
+<br/>
+
+### Don't
+```kotlin
+// 현재 CompositionLocal 설정을 기반으로 스타일을 반환합니다. 이 함수는 컨텍스트가 없는 객체를 구성하는 것처럼 보입니다!
 @Composable
 fun Style(): Style {
-Naming @Composable functions that remember {} the objects they return
-Jetpack Compose framework development and Library development MUST prefix any @Composable factory function that internally remember {}s and returns a mutable object with the prefix remember.
+```
 
-App development SHOULD follow this same convention.
+<br/>
 
-Why
-An object that can change over time and persists across recompositions carries observable side effects that should be clearly communicated to a caller. This also signals that a caller does not need to duplicate a remember {} of the object at the call site to attain this persistence.
+## 반환되는 객체를 `remember {}` 로 만드는 @Composable 함수 명명
+**Jetpack Composite 프레임워크 개발 및 라이브러리 개발**은 내부적으로 `remember {}`를 만들고 `remember`라는 접두사를 가진 가변 객체를 리턴하는 모든 `@Composable` 팩토리 함수 앞에 접두사를 붙여야 합니다.
 
-Do
-// Returns a CoroutineScope that will be cancelled when this call
-// leaves the composition
-// This function is prefixed with remember to describe its behavior
+**앱 개발**은 이와 같은 관례를 따라야 합니다.
+
+<br/>
+
+### Why?
+시간이 지남에 따라 바뀔 수 있고 recomposition 전반에 걸쳐 지속되는 객체는 observable한 사이드 이펙트를 가지고 있으며, 이는 호출자에게 명확하게 전달되어야 합니다. 이는 또한 호출자가 이런 지속성을 얻기 위해 호출 하는 곳에서 객체의 `remember {}`를 복제할 필요가 없음을 나타냅니다.
+
+<br/>
+
+### Do
+```kotlin
+// 이 호출이 composition을 떠날 때 취소될 CoroutineScope를 리턴합니다.
+// 이 함수 앞에는 동작을 설명하기 위해 rememeber 접두사가 앞에 붙습니다.
 @Composable
 fun rememberCoroutineScope(): CoroutineScope {
-Don't
-// Returns a CoroutineScope that will be cancelled when this call leaves
-// the composition
-// This function's name does not suggest automatic cancellation behavior!
+```
+
+<br/>
+
+### Don't
+```kotlin
+// 이 호출이 composition을 떠날 때 취소될 CoroutineScope를 리턴합니다.
+// 이 함수의 이름으로는 자동으로 취소되는 동작을 예측할 수 없습니다!
 @Composable
 fun createCoroutineScope(): CoroutineScope {
-Note that returning an object is not sufficient to consider a function to be a factory function; it must be the function‘s primary purpose. Consider a @Composable function such as Flow<T>.collectAsState(); this function’s primary purpose is to establish a subscription to a Flow; that it remember {}s its returned State<T> object is incidental.
+```
+객체를 리턴하는 것만으로는 함수를 팩토리 함수로 간주하기에 충분하지 않습니다. 이는 함수의 주요 목적이어야 합니다. `Flow<T>.collectAsState()` 같은 `@Composable` 함수를 생각해보세요. 이 함수의 주요 목적은 flow에 대한 구독을 설정하는 것이고, 반환된 `State<T>` 객체를 `remember {}`로 만드는 것은 부수적인 것입니다.
+
+<br/>
 
 Naming CompositionLocals
 A CompositionLocal is a key into a composition-scoped key-value table. CompositionLocals may be used to provide global-like values to a specific subtree of composition.
