@@ -52,7 +52,7 @@ Jetpack Compose는 시간이 지남에 따라 스레드 간에 안정적으로 �
 
 <br/>
 
-### Do
+### ✅ Do
 ```kotlin
 const val DefaultKeyName = "__defaultKey"
 
@@ -76,7 +76,7 @@ enum class Status {
 
 <br/>
 
-### Don't
+### ❌ Don't
 ```kotlin
 const val DEFAULT_KEY_NAME = "__defaultKey"
 
@@ -119,7 +119,7 @@ Compose 컴파일러 플러그인과 runtime은 코틀린을 위한 새로운 �
 
 <br/>
 
-### Do
+### ✅ Do
 ```kotlin
 // 이 함수는 PascalCased 명사로 시각적 UI 요소를 설명합니다
 @Composable
@@ -128,7 +128,7 @@ fun FancyButton(text: String, onClick: () -> Unit) {
 
 <br/>
 
-### Do
+### ✅ Do
 ```kotlin
 // 이 함수는 PascalCased 명사로 composition에 존재하는 비시각적 요소를 설명합니다.
 @Composable
@@ -137,7 +137,7 @@ fun BackButtonHandler(onBackPressed: () -> Unit) {
 
 <br/>
 
-### Don't
+### ❌ Don't
 ```kotlin
 // 이 함수는 명사이지만 PascalCase가 아닙니다!
 @Composable
@@ -146,7 +146,7 @@ fun fancyButton(text: String, onClick: () -> Unit) {
 
 <br/>
 
-### Don't
+### ❌ Don't
 ```kotlin
 // 이 함수는 PascalCased이지만 명사가 아닙니다!
 @Composable
@@ -155,7 +155,7 @@ fun RenderFancyButton(text: String, onClick: () -> Unit) {
 
 <br/>
 
-### Don't
+### ❌ Don't
 ```kotlin
 // 이 함수는 PascalCase도 아니고 명사도 아닙니다!
 @Composable
@@ -169,7 +169,7 @@ fun drawProfileImage(image: ImageAsset) {
 
 <br/>
 
-**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 함수의 추상적 리턴 타입과 매치되는 `PascalCase`로 명명된 어노테이션이 달린 함수의 이름을 지정하기 위해 Kotlin Coding Conventions의 팩토리 함수 규약을 사용해서는 안 됩니다.
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 함수의 추상적 리턴 타입과 매치되는 `PascalCase`로 명명된 어노테이션이 달린 함수의 이름을 지정하기 위해 Kotlin Coding Conventions의 팩토리 함수 규약을 사용해서는 안 됩니다.
 
 <br/>
 
@@ -178,13 +178,13 @@ fun drawProfileImage(image: ImageAsset) {
 
 팩토리 함수를 `@Composable`로 표시하는 주요 예시로는, composition을 사용하여 객체의 라이프사이클을 설정하거나 `CompositionLocals`를 객체의 구성에 대한 입력으로 사용하는 경우가 있습니다. 전자는 recomposition 전반에 걸쳐 객체 인스턴스를 캐시하고 유지 관리하기 위해 Compose의 `remember {}` API를 사용하는 것을 의미하며, 이는 생성자 호출처럼 읽어들이는 팩토리 작업에 대한 호출자의 예상을 깨뜨릴 수 있습니다.(다음 섹션 참조) 후자의 동기는 팩토리 함수 이름으로 표현되어야 하는 보이지 않는 입력을 의미합니다.
 
-또한 선언적 구체로서 `@Composable` 함수를 리턴하는 단위의 멘탈 모델은 "가상 DOM" 멘탈 모델과 혼동되어서는 안 됩니다. `PascalCase` 명사로 명명된 `@Composable` 함수에서 값을 리턴하는 것은 이러한 혼란을 조장하고, 호이스팅된 상태 객체로 더 잘 표현할 수 있으며 현재 UI 엔티티에 대해 상태 저장을 제어하는 surface를 리턴하는 바람직하지 않은 스타일을 촉진할 수 있습니다.
+또한 선언적 구체로서 `@Composable` 함수를 리턴하는 단위의 멘탈 모델은 "가상 DOM" 멘탈 모델과 혼동되어서는 안 됩니다. `PascalCase` 명사로 명명된 `@Composable` 함수에서 값을 리턴하는 것은 이러한 혼란을 조장하고, 호이스팅된 상태 객체로 더 잘 표현할 수 있으며 현재 UI 엔티티에 대해 상태 저장을 제어하는 surface를 리턴하는 바람직하지 않은 스타일을 촉진할 수 있습니다.
 
-상태 호이스팅 패턴에 대한 자세한 내용은 이 문서의 디자인 패턴 섹션을 참조하십시오.
+상태 호이스팅 패턴에 대한 자세한 내용은 이 문서의 디자인 패턴 섹션을 참조하십시오.
 
 <br/>
 
-### Do
+### ✅ Do
 ```kotlin
 // 현재 CompositionLocal 설정을 기준으로 스타일을 반환합니다. 이 함수는 해당 값의 출처를 한정합니다.
 @Composable
@@ -193,7 +193,7 @@ fun defaultStyle(): Style {
 
 <br/>
 
-### Don't
+### ❌ Don't
 ```kotlin
 // 현재 CompositionLocal 설정을 기반으로 스타일을 반환합니다. 이 함수는 컨텍스트가 없는 객체를 구성하는 것처럼 보입니다!
 @Composable
@@ -214,7 +214,7 @@ fun Style(): Style {
 
 <br/>
 
-### Do
+### ✅ Do
 ```kotlin
 // 이 호출이 composition을 떠날 때 취소될 CoroutineScope를 리턴합니다.
 // 이 함수 앞에는 동작을 설명하기 위해 rememeber 접두사가 앞에 붙습니다.
@@ -224,7 +224,7 @@ fun rememberCoroutineScope(): CoroutineScope {
 
 <br/>
 
-### Don't
+### ❌ Don't
 ```kotlin
 // 이 호출이 composition을 떠날 때 취소될 CoroutineScope를 리턴합니다.
 // 이 함수의 이름으로는 자동으로 취소되는 동작을 예측할 수 없습니다!
