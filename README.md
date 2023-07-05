@@ -235,75 +235,114 @@ fun createCoroutineScope(): CoroutineScope {
 
 <br/>
 
-Naming CompositionLocals
-A CompositionLocal is a key into a composition-scoped key-value table. CompositionLocals may be used to provide global-like values to a specific subtree of composition.
+## CompositionLocals 명명
+`CompositionLocal`은 composition-scope 키-값 테이블의 키입니다. `CompositionLocal`은 특정 composition 하위 트리에 전역 값 같은 값을 제공하는 데 사용될 수 있습니다.
 
-Jetpack Compose framework development and Library development MUST NOT name CompositionLocal keys using “CompositionLocal” or “Local” as a noun suffix. CompositionLocal keys should bear a descriptive name based on their value.
+<br/>
 
-Jetpack Compose framework development and Library development MAY use “Local” as a prefix for a CompositionLocal key name if no other, more descriptive name is suitable.
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 "`CompositionLocal`" 또는 "`Local`"을 명사 접미사로 사용하여 `CompositionLocal` 키에 이름을 지정하면 안 됩니다. `CompositionLocal` 키에는 값을 기준으로 설명하는 이름이 있어야 합니다.
 
-Do
-// "Local" is used here as an adjective, "Theme" is the noun.
+<br/>
+
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 적합한 설명할 만한 이름이 없는 경우 `CompositionLocal` 키 이름의 접두사로 "`Local`"을 사용할 수 있습니다.
+
+<br/>
+
+### Do
+```kotlin
+// 여기서 "Local"은 형용사로 사용되며, "Theme"는 명사입니다.
 val LocalTheme = staticCompositionLocalOf<Theme>()
-Don't
-// "Local" is used here as a noun!
+```
+
+### Don't
+```kotlin
+// 여기서 "Local"은 명사로 쓰이고 있습니다!
 val ThemeLocal = staticCompositionLocalOf<Theme>()
-Stable types
-The Compose runtime exposes two annotations that may be used to mark a type or function as stable - safe for optimization by the Compose compiler plugin such that the Compose runtime may skip calls to functions that accept only safe types because their results cannot change unless their inputs change.
+```
 
-The Compose compiler plugin may infer these properties of a type automatically, but interfaces and other types for which stability can not be inferred, only promised, may be explicitly annotated. Collectively these types are called, “stable types.”
+<br/>
 
-@Immutable indicates a type where the value of any properties will never change after the object is constructed, and all methods are referentially transparent. All Kotlin types that may be used in a const expression (primitive types and Strings) are considered @Immutable.
+## Stable 타입
+Compose 런타임은 두 가지 어노테이션을 노출시켜 타입 또는 함수를 안정적으로 표시하는 데 사용할 수 있습니다. 이렇게 하면 Compose 컴파일러 플러그인에 의해 최적화 대상이 되어 Compose 런타임이 입력이 변경되지 않는 한 결과가 변경될 수 없는 함수 호출을 건너뛸 수 있습니다.
 
-@Stable when applied to a type indicates a type that is mutable, but the Compose runtime will be notified if and when any public properties or method behavior would yield different results from a previous invocation. (In practice this notification is backed by the Snapshot system via @Stable MutableState objects returned by mutableStateOf().) Such a type may only back its properties using other @Stable or @Immutable types.
+Compose 컴파일러 플러그인은 타입의 이러한 프로퍼티을 자동으로 추론할 수 있지만 안정성을 추론할 수 없는 인터페이스 및 기타 타입은 명시적으로 어노테이션을 처리해야 합니다. 이러한 타입을 "안정적인 타입(stable types)"이라고 합니다.
 
-Jetpack Compose framework development, Library development and App development MUST ensure in custom implementations of .equals() for @Stable types that for any two references a and b of @Stable type T, a.equals(b) MUST always return the same value. This implies that any future changes to a must also be reflected in b and vice versa.
+`@Immutable`은 객체가 생성된 후에는 프로퍼티의 값이 절대로 변경되지 않으며, 모든 메서드가 참조적으로 투명한 타입을 나타냅니다. Kotlin에서 `const` 식에 사용될 수 있는 모든 타입(primitive 타입 및 `String`)은 `@Immutable`로 간주됩니다.
 
-This constraint is always met implicitly if a === b; the default reference equality implementation of .equals() for objects is always a correct implementation of this contract.
+`@Stable`은 타입에 적용되면 해당 타입이 가변적이지만, Compose 런타임은 public 프로퍼티나 메서드의 동작이 이전 호출과 다른 결과를 생성할 때 알림을 받습니다. (실제로 이 알림은 스냅샷 시스템의 `@Stable` `MutableState` 객체를 통해 지원되며 `mutableStateOf()`에 의해 리턴됩니다.) 이러한 타입은 프로퍼티를 다른 `@Stable` 또는 `@Immutable` 타입을 사용해야만 백업할 수 있습니다.
 
-Jetpack Compose framework development and Library development SHOULD correctly annotate @Stable and @Immutable types that they expose as part of their public API.
+<br/>
 
-Jetpack Compose framework development and Library development MUST NOT remove the @Stable or @Immutable annotation from a type if it was declared with one of these annotations in a previous stable release.
+**Jetpack Compose 프레임워크 개발, 라이브러리 개발 및 앱 개발**시 `@Stable` 타입에 대한 커스텀 `.equals()` 구현에서 항상 두 참조 `a`와 `b`에 대해 `a.equals(b)`가 항상 동일한 값을 리턴해야 함을 보장해야 합니다. 이는 `a`와 `b` 모두에 대한 미래의 변경 사항도 반영되어야 함을 의미합니다.
 
-Jetpack Compose framework development and Library development MUST NOT add the @Stable or @Immutable annotation to an existing non-final type that was available in a previous stable release without this annotation.
+이 제약은 항상 `a === b`일 경우에는 암시적으로 충족됩니다. 객체에 대한 기본 참조 동등성 구현은 언제나 이 계약의 올바른 구현입니다.
 
-Why?
-@Stable and @Immutable are behavioral contracts that impact the binary compatibility of code generated by the Compose compiler plugin. Libraries should not declare more restrictive contracts for preexisting non-final types that existing implementations in the wild may not correctly implement, and similarly they may not declare that a library type no longer obeys a previously declared contract that existing code may depend upon.
+<br/>
 
-Implementing the stable contract incorrectly for a type annotated as @Stable or @Immutable will result in incorrect behavior for @Composable functions that accept that type as a parameter or receiver.
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 public API의 일부로 노출되는 `@Stable` 및 `@Immutable` 타입을 올바르게 어노테이션 처리해야 합니다.
 
-Emit XOR return a value
-@Composable functions should either emit content into the composition or return a value, but not both. If a composable should offer additional control surfaces to its caller, those control surfaces or callbacks should be provided as parameters to the composable function by the caller.
+<br/>
 
-Jetpack Compose framework development and Library development MUST NOT expose any single @Composable function that both emits tree nodes and returns a value.
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 이전의 안정적인 버전에 이미 해당 어노테이션으로 선언된 타입에서 `@Stable` 또는 `@Immutable` 어노테이션을 제거해서는 안 됩니다.
 
-Why
-Emit operations must occur in the order the content is to appear in the composition. Using return values to communicate with the caller restricts the shape of calling code and prevents interactions with other declarative calls that come before it.
+<br/>
 
-Do
-// Emits a text input field element that will call into the inputState
-// interface object to request changes
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 이전의 안정적인 버전에서 해당 어노테이션 없이 사용 가능한 기존의 non-final 타입에 `@Stable` 또는 `@Immutable` 주석을 추가해서는 안 됩니다.
+
+<br/>
+
+### Why?
+`@Stable`과 `@Immutable`은 Compose 컴파일러 플러그인에 의해 생성된 코드의 이진 호환성에 영향을 미치는 행위의 계약입니다. 라이브러리는 기존에 이미 존재하는 non-final 타입에 대해 더 제한적인 계약을 선언해서는 안 되며, 이미 사용 중인 기존 구현이 올바르게 구현되지 않을 수도 있는 제한적인 계약을 선언해서도 안 됩니다. 마찬가지로, 라이브러리의 타입이 이전에 선언된 계약을 더 이상 따르지 않게 선언해서는 안 됩니다. 기존 코드가 해당 계약에 의존할 수 있기 때문입니다.
+
+`@Stable` 또는 `@Immutable`로 어노테이션이 달린 타입을 잘못 구현하면 해당 타입을 매개변수나 수신자로 사용하는 `@Composable` 함수에 대해 잘못된 동작이 발생할 수 있습니다.
+
+<br/>
+
+### 값을 리턴하거나 구성 요소를 생성하는 작업(Emit XOR return a value)
+`@Composable` 함수는 구성 요소를 composition에 포함시키거나 값을 리턴해야 하며, 둘 다 동시에 수행해서는 안 됩니다. 만약 composable 함수가 호출자에게 추가적인 옵션을 제공해야 한다면, 이러한 옵션이나 콜백은 호출자에 의해 composable 함수에 매개변수로 제공되어야 합니다.
+
+<br/>
+
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 트리 노드를 생성하고 동시에 값을 반환하는 단일 `@Composable` 함수를 노출해서는 안 됩니다.
+
+<br/>
+
+### Why?
+Emit 작업은 composition에 표시되는 내용이 나타날 순서대로 발생해야 합니다. 리턴 값을 사용하여 호출자와 통신하는 것은 호출 코드의 모양을 제한하고, 그 앞에서 선언된 다른 선언적 호출과의 상호작용을 방해합니다.
+
+<br/>
+
+### ✅ Do
+```kotlin
+// 입력 상태를 요청하기 위해 inputState 인터페이스 객체를 호출하는 텍스트 입력 필드 엘리먼트를 생성(Emit)
 @Composable
 fun InputField(inputState: InputState) {
-// ...
+    // ...
 
-// Communicating with the input field is not order-dependent
-val inputState = remember { InputState() }
+    // input field와의 상호작용은 순서에 의존하지 않음
+    val inputState = remember { InputState() }
 
-Button("Clear input", onClick = { inputState.clear() })
+    Button("Clear input", onClick = { inputState.clear() })
 
-InputField(inputState)
-Don't
-// Emits a text input field element and returns an input value holder
+    InputField(inputState)
+}
+```
+
+<br/>
+
+### ❌ Don't
+```kotlin
+// 텍스트 입력 필드 엘리먼트를 생성(Emit)하고 입력 값의 홀더를 반환
 @Composable
 fun InputField(): UserInputState {
-// ...
+    // ...
 
-// Communicating with the InputField is made difficult
-Button("Clear input", onClick = { TODO("???") })
-val inputState = InputField()
-Communicating with a composable by passing parameters forward affords aggregation of several such parameters into types used as parameters to their callers:
-
+    // InputField와의 소통을 어렵게 만든다.
+    Button("Clear input", onClick = { TODO("???") })
+    val inputState = InputField()
+```
+매개변수를 전달하여 composable과 통신하는 것은 해당 매개변수들을 호출자의 매개변수로 사용되는 타입에 그룹화할 수 있는 기능을 제공합니다.
+```kotlin
 interface DetailCardState {
     val actionRailState: ActionRailState
     // ...
@@ -321,7 +360,10 @@ fun DetailCard(state: DetailCardState) {
 fun ActionRail(state: ActionRailState) {
     // ...
 }
-For more information on this pattern, see the sections on hoisted state types in the Compose API design patterns section below.
+```
+이 패턴에 대한 자세한 정보는 아래의 Compose API 디자인 패턴 섹션에서 **hoisted state types**(호이스팅된 상태 타입)에 관한 부분을 참조하세요.
+
+<br/>
 
 Compose UI API structure
 Compose UI is a UI toolkit built on the Compose runtime. This section outlines guidelines for APIs that use and extend the Compose UI toolkit.
