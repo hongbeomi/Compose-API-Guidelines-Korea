@@ -167,8 +167,6 @@ fun drawProfileImage(image: ImageAsset) {
 ## 값을 리턴하는 @Composable 함수 명명
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 `Unit`이 아닌 값을 리턴하는 `@Composable`에 어노테이션이 달린 함수의 이름을 지정하기 위해 표준 Kotlin 코딩 규칙을 따라야 합니다.
 
-<br/>
-
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 함수의 추상적 리턴 타입과 매치되는 `PascalCase`로 명명된 어노테이션이 달린 함수의 이름을 지정하기 위해 Kotlin Coding Conventions의 팩토리 함수 규약을 사용해서는 안 됩니다.
 
 <br/>
@@ -238,11 +236,7 @@ fun createCoroutineScope(): CoroutineScope {
 ## CompositionLocals 명명
 `CompositionLocal`은 composition-scope 키-값 테이블의 키입니다. `CompositionLocal`은 특정 composition 하위 트리에 전역 값 같은 값을 제공하는 데 사용될 수 있습니다.
 
-<br/>
-
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 "`CompositionLocal`" 또는 "`Local`"을 명사 접미사로 사용하여 `CompositionLocal` 키에 이름을 지정하면 안 됩니다. `CompositionLocal` 키에는 값을 기준으로 설명하는 이름이 있어야 합니다.
-
-<br/>
 
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 적합한 설명할 만한 이름이 없는 경우 `CompositionLocal` 키 이름의 접두사로 "`Local`"을 사용할 수 있습니다.
 
@@ -271,21 +265,13 @@ Compose 컴파일러 플러그인은 타입의 이러한 프로퍼티을 자동�
 
 `@Stable`은 타입에 적용되면 해당 타입이 가변적이지만, Compose 런타임은 public 프로퍼티나 메서드의 동작이 이전 호출과 다른 결과를 생성할 때 알림을 받습니다. (실제로 이 알림은 스냅샷 시스템의 `@Stable` `MutableState` 객체를 통해 지원되며 `mutableStateOf()`에 의해 리턴됩니다.) 이러한 타입은 프로퍼티를 다른 `@Stable` 또는 `@Immutable` 타입을 사용해야만 백업할 수 있습니다.
 
-<br/>
-
 **Jetpack Compose 프레임워크 개발, 라이브러리 개발 및 앱 개발**시 `@Stable` 타입에 대한 커스텀 `.equals()` 구현에서 항상 두 참조 `a`와 `b`에 대해 `a.equals(b)`가 항상 동일한 값을 리턴해야 함을 보장해야 합니다. 이는 `a`와 `b` 모두에 대한 미래의 변경 사항도 반영되어야 함을 의미합니다.
 
 이 제약은 항상 `a === b`일 경우에는 암시적으로 충족됩니다. 객체에 대한 기본 참조 동등성 구현은 언제나 이 계약의 올바른 구현입니다.
 
-<br/>
-
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 public API의 일부로 노출되는 `@Stable` 및 `@Immutable` 타입을 올바르게 어노테이션 처리해야 합니다.
 
-<br/>
-
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 이전의 안정적인 버전에 이미 해당 어노테이션으로 선언된 타입에서 `@Stable` 또는 `@Immutable` 어노테이션을 제거해서는 안 됩니다.
-
-<br/>
 
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 이전의 안정적인 버전에서 해당 어노테이션 없이 사용 가능한 기존의 non-final 타입에 `@Stable` 또는 `@Immutable` 주석을 추가해서는 안 됩니다.
 
@@ -300,8 +286,6 @@ Compose 컴파일러 플러그인은 타입의 이러한 프로퍼티을 자동�
 
 ### 값을 리턴하거나 구성 요소를 생성하는 작업(Emit XOR return a value)
 `@Composable` 함수는 구성 요소를 composition에 포함시키거나 값을 리턴해야 하며, 둘 다 동시에 수행해서는 안 됩니다. 만약 composable 함수가 호출자에게 추가적인 옵션을 제공해야 한다면, 이러한 옵션이나 콜백은 호출자에 의해 composable 함수에 매개변수로 제공되어야 합니다.
-
-<br/>
 
 **Jetpack Compose 프레임워크 개발 및 라이브러리 개발**시 트리 노드를 생성하고 동시에 값을 반환하는 단일 `@Composable` 함수를 노출해서는 안 됩니다.
 
@@ -318,14 +302,14 @@ Emit 작업은 composition에 표시되는 내용이 나타날 순서대로 발�
 @Composable
 fun InputField(inputState: InputState) {
     // ...
-
-    // input field와의 상호작용은 순서에 의존하지 않음
-    val inputState = remember { InputState() }
-
-    Button("Clear input", onClick = { inputState.clear() })
-
-    InputField(inputState)
 }
+
+// input field와의 상호작용은 순서에 의존하지 않음
+val inputState = remember { InputState() }
+
+Button("Clear input", onClick = { inputState.clear() })
+
+InputField(inputState)
 ```
 
 <br/>
@@ -336,11 +320,11 @@ fun InputField(inputState: InputState) {
 @Composable
 fun InputField(): UserInputState {
     // ...
-
-    // InputField와의 소통을 어렵게 만든다.
-    Button("Clear input", onClick = { TODO("???") })
-    val inputState = InputField()
 }
+
+// InputField와의 소통을 어렵게 만든다.
+Button("Clear input", onClick = { TODO("???") })
+val inputState = InputField()
 ```
 매개변수를 전달하여 composable과 통신하는 것은 해당 매개변수들을 호출자의 매개변수로 사용되는 타입에 그룹화할 수 있는 기능을 제공합니다.
 ```kotlin
@@ -387,8 +371,6 @@ fun SimpleLabel(
 
 <br/>
 **Jetpack Compose 프레임워크 개발과 라이브러리 개발**은 이 섹션의 모든 지침을 따라야 합니다.
-
-<br/>
 
 **Jetpack Compose 앱 개발**은 이 섹션의 모든 지침을 가능한 만큼 따르는 것이 좋습니다.
 
@@ -473,53 +455,75 @@ fun FancyButton(
 
 <br/>
 
-Compose UI layouts
-A Compose UI element that accepts one or more @Composable function parameters is called a layout.
+### Compose UI layouts
+하나 이상의 `@Composable` 함수 매개변수를 받는 Compose UI 요소를 layout이라고 합니다.
 
-Example:
-
+<br/>
+예시:
+```kotlin
 @Composable
 fun SimpleRow(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-Jetpack Compose framework development and Library development MUST follow all guidelines in this section.
+```
 
-Jetpack Compose app development SHOULD follow all guidelines in this section.
+<br/>
 
-Layout functions SHOULD use the name “content” for a @Composable function parameter if they accept only one @Composable function parameter.
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 이 섹션의 모든 지침을 따라야 합니다.
 
-Layout functions SHOULD use the name “content” for their primary or most common @Composable function parameter if they accept more than one @Composable function parameter.
+**Jetpack Compose 앱 개발**은 이 섹션의 모든 지침을 가능한 경우 따라야 합니다.
 
-Layout functions SHOULD place their primary or most common @Composable function parameter in the last parameter position to permit the use of Kotlin's trailing lambda syntax for that parameter.
+<br/>
 
-Compose UI modifiers
-A Modifier is an immutable, ordered collection of objects that implement the Modifier.Element interface. Modifiers are universal decorators for Compose UI elements that may be used to implement and add cross-cutting behavior to elements in an opaque and encapsulated manner. Examples of modifiers include altering element sizing and padding, drawing content beneath or overlapping the element, or listening to touch events within the UI element's bounding box.
+Layout 함수는 오직 하나의 `@Composable` 함수 매개변수만을 받는 경우, 이를 "**content**"라는 이름으로 사용해야 합니다.
 
-Jetpack Compose framework development and Library development MUST follow all guidelines in this section.
+Layout 함수는 두 개 이상의 `@Composable` 함수 매개변수를 받는 경우, 주요 또는 가장 일반적인 `@Composable` 함수 매개변수에 대해 "**content**"라는 이름을 사용해야 합니다.
 
-Modifier factory functions
-Modifier chains are constructed using a fluent builder syntax expressed as Kotlin extension functions that act as factories.
+Layout 함수는 주요 또는 가장 일반적인 `@Composable` 함수 매개변수를 마지막 매개변수 위치에 배치하여 Kotlin의 trailing lambda syntax를 사용할 수 있도록 해야 합니다.
 
-Example:
+<br/>
 
+### Compose UI modifiers
+`Modifier`는 `Modifier.Element` 인터페이스를 구현하는 객체들의 변경 불가능하며 순서가 있는 컬렉션입니다. `Modifier`는 Compose UI 요소에 대한 범용적인 데코레이터로서, 요소에 교차하는 행위를 불투명하고 캡슐화된 방식으로 구현하고 추가하는 데 사용될 수 있습니다. `Modifier`의 예시로는 요소 크기 및 `padding` 변경, 요소 아래 또는 겹치게 콘텐츠 그리기, 또는 UI 요소의 bounding box 내에서 터치 이벤트 감지 등이 있습니다.
+
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 이 섹션의 모든 지침을 따라야 합니다.
+
+<br/>
+
+### Modifier 팩토리 함수
+`Modifier` 체인은 팩토리 역할을 하는 Kotlin 확장 함수로 구성된 유연한 빌더 구문을 사용하여 생성됩니다.
+
+<br/>
+
+예시:
+```kotlin
 Modifier.preferredSize(50.dp)
     .backgroundColor(Color.Blue)
     .padding(10.dp)
-Modifier APIs MUST NOT expose their Modifier.Element interface implementation types.
+```
 
-Modifier APIs MUST be exposed as factory functions following this style:
+`Modifier` API는 `Modifier.Element` 인터페이스 구현 타입을 노출해서는 안 됩니다.
 
+`Modifier` API는 다음 스타일을 따르는 팩토리 함수로 노출되어야 합니다:
+```kotlin
 fun Modifier.myModifier(
     param1: ...,
     paramN: ...
 ): Modifier = then(MyModifierImpl(param1, ... paramN))
-Layout-scoped modifiers
-Android‘s View system has the concept of LayoutParams - a type of object stored opaquely with a ViewGroup’s child view that provides layout instructions specific to the ViewGroup that will measure and position it.
+```
 
-Compose UI modifiers afford a related pattern using ParentDataModifier and receiver scope objects for layout content functions:
+<br/>
 
-Example
+### Layout-scoped modifiers
+Android의 `View` 시스템에는 `LayoutParams`라는 개념이 있습니다. 이는 `ViewGroup`의 자식 뷰와 함께 불투명하게 저장되는 객체로서 `ViewGroup`이 이를 측정하고 배치하는 데 특정한 레이아웃 지침을 제공합니다.
+
+Compose UI `modifier`는 `ParentDataModifier` 및 수신자 스코프 객체를 사용하여 layout의 `content` 함수에 관련된 패턴을 제공합니다.
+
+<br/>
+
+예시:
+```kotlin
 @Stable
 interface WeightScope {
     fun Modifier.weight(weight: Float): Modifier
@@ -530,14 +534,19 @@ fun WeightedRow(
     modifier: Modifier = Modifier,
     content: @Composable WeightScope.() -> Unit
 ) {
-// ...
+    // ...
+}
 
-// Usage:
+// 사용 사례:
 WeightedRow {
     Text("Hello", Modifier.weight(1f))
     Text("World", Modifier.weight(2f))
 }
-Jetpack Compose framework development and library development SHOULD use scoped modifier factory functions to provide parent data modifiers specific to a parent layout composable.
+```
+
+**Jetpack Compose 프레임워크 개발 및 라이브러리 개발**은 부모 레이아웃 composable에 특정한 `ParentDataModifier`를 제공하기 위해 scoped `modifier` 팩토리 함수를 사용해야 합니다.
+
+<br/>
 
 Compose API design patterns
 This section outlines patterns for addressing common use cases when designing a Jetpack Compose API.
