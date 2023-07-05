@@ -248,13 +248,13 @@ fun createCoroutineScope(): CoroutineScope {
 
 <br/>
 
-### Do
+### ✅ Do
 ```kotlin
 // 여기서 "Local"은 형용사로 사용되며, "Theme"는 명사입니다.
 val LocalTheme = staticCompositionLocalOf<Theme>()
 ```
 
-### Don't
+### ❌ Don't
 ```kotlin
 // 여기서 "Local"은 명사로 쓰이고 있습니다!
 val ThemeLocal = staticCompositionLocalOf<Theme>()
@@ -340,6 +340,7 @@ fun InputField(): UserInputState {
     // InputField와의 소통을 어렵게 만든다.
     Button("Clear input", onClick = { TODO("???") })
     val inputState = InputField()
+}
 ```
 매개변수를 전달하여 composable과 통신하는 것은 해당 매개변수들을 호출자의 매개변수로 사용되는 타입에 그룹화할 수 있는 기능을 제공합니다.
 ```kotlin
