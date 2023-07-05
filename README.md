@@ -1,4 +1,4 @@
-# Compose API Guidelines (KO)
+# [Compose API Guidelines](https://android.googlesource.com/platform/frameworks/support/+/androidx-main/compose/docs/compose-api-guidelines.md) (KO)
 
 Compose API 가이드라인은 관용적인 Jetpack Compose API를 작성하기 위한 패턴, 모범 사례 및 규범적인 스타일 지침을 개략적으로 설명합니다. Jetpack Compose 코드가 레이어에 내장되면서, Jetpack Compose를 사용하는 코드를 작성하는 모든 사람들은 이를 사용하기 위해 자신만의 API를 구축하고 있습니다.
 
